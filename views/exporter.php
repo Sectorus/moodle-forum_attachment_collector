@@ -51,7 +51,8 @@ if(isset($_POST['selectCourse']) && !isset($_POST['selectForum'])){
 	echo '<form class="forum-attachment-export-form" action= "' . $submitlink . '" method="POST">';
 	echo '<select name = "selectForum">';
 	foreach ($all_forums as $forum){
-		echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . context_course::instance($_POST['selectCourse'])->id . ')</option>';
+		$attachment_count = sizeof(getFiles($forum->id));
+		echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . $attachment_count . ' files)</option>';
 	}
 	echo '<input type = "submit" name="submit" class="btn-download" value="';
 	echo get_string('expbtn', 'local_forum_attachment_collector') . '" />';
@@ -80,42 +81,51 @@ function getForums(){
 	return $courses;
 }
 
-function getFiles(){
+function getFiles($forumid){
 	global $DB;
-	$sql = "select distinct mfd.id as forumid, mf2.* " .
-	"from {forum_discussions} mfd inner join {course_modules} mcm on (mfd.forum = mcm.instance) " .
-	"inner join {context} mc on (mcm.id = mc.instanceid) " .
-	"inner join {files} mf2 on (mf2.contextid = mc.id) " .
-	"where mf2.filearea = 'attachment' and not mf2.filename = '.';";
-	$files = $DB->get_records_sql($sql);
 
+	$sql = "SELECT mf2.filename, mfd.id, mf.name AS forumname, mc2.fullname as coursename, mfd.name AS discussion, " .
+	"mf2.contextid, mf2.component, mf2.filearea, mf2.itemid, mf2.filepath, mf2.author " .
+	"FROM {forum_discussions} mfd " .
+	"INNER JOIN {course_modules} mcm ON (mfd.forum = mcm.instance) " .
+	"INNER JOIN {context} mc ON (mcm.id = mc.instanceid) " .
+	"INNER JOIN {files} mf2 ON (mf2.contextid = mc.id) " .
+	"INNER JOIN {forum} mf ON (mfd.forum = mf.id) " .
+	"INNER JOIN {course} mc2 ON (mf.course = mc2.id) " .
+	"WHERE mfd.id = :forum_id AND mf2.filename <> '.'";
+	
+	$files = $DB->get_records_sql($sql, array('forum_id'=>$forumid));
+	
 	return $files;
 }
 
 function createDownloadPackage(){
 	global $CFG;
-	$files = getFiles();
+	$files = getFiles($_POST['selectForum']);
 	$fs = get_file_storage();
 	$zip = array();
+	
+	$coursename = "";
 
 	foreach ($files as $attachment){
-		if(strcmp($attachment->forumid, $_POST['selectForum'])){
-			$attachment_file = $fs->get_file(
-				$attachment->contextid,
-				$attachment->component,
-				$attachment->filearea,
-				$attachment->itemid,
-				$attachment->filepath,
-				$attachment->filename);
-				$zip[$attachment->filename] = $attachment_file;
-			}
-		}
+		$attachment_file = $fs->get_file(
+		$attachment->contextid,
+		$attachment->component,
+		$attachment->filearea,
+		$attachment->itemid,
+		$attachment->filepath,
+		$attachment->filename);
+		$coursename = $attachment->coursename;
+		$ext = end(explode('.', $attachment->filename));
+		$pathname = $attachment->forumname . "_Forum/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
+		$zip[$pathname] = $attachment_file;
+	}
 
 		$tempzip = tempnam($CFG->tempdir . '/', 'forum_attachments_');
 		$zipper = new zip_packer();
 
 		if ($zipper->archive_to_pathname($zip, $tempzip)) {
-			send_temp_file($tempzip, "course_attachments.zip");
+			send_temp_file($tempzip, $coursename . "_attachments.zip");
 		}
 	}
 ?>
