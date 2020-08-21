@@ -30,5 +30,5 @@ $string['forum_attachment_collector_exporter'] = 'Forum Attachment Exporter';
 $string['select_course'] = 'Select course';
 $string['select_forum'] = 'Select forum';
 $string['expforumbtn'] = 'Load Forums';
-$string['expbtn'] = 'Download'
+$string['expbtn'] = 'Download';
 $string['noentries'] = 'There are no entries for the selected course.';
