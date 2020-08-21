@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] ="Forum Attachment Collector";
-$string['forum_attachment_collector:viewexporter']   = 'View the Forum Attachment Exporter';
-$string['forum_attachment_collector_exporter'] = 'Foren Attachment Exporter';
-$string['select_course'] = 'Select course';
-$string['select_forum'] = 'Select forum';
-$string['expforumbtn'] = 'Load Forums';
+$string['forum_attachment_collector:viewexporter']   = 'Foren Anlagen Export anzeigen';
+$string['forum_attachment_collector_exporter'] = 'Foren Anlagen Export';
+$string['select_course'] = 'Kursauswahl';
+$string['select_forum'] = 'Forenauswahl';
+$string['expforumbtn'] = 'Lade Foren';
 $string['expbtn'] = 'Download';
-$string['files'] = 'files';
+$string['files'] = 'Datei/en';
 $string['noentries'] = 'There are no entries for the selected course.';

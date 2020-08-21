@@ -52,7 +52,7 @@ if(isset($_POST['selectCourse']) && !isset($_POST['selectForum'])){
 	echo '<select name = "selectForum">';
 	foreach ($all_forums as $forum){
 		$attachment_count = sizeof(getFiles($forum->id));
-		echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . $attachment_count . ' files)</option>';
+		echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . $attachment_count . " " . get_string('files', 'local_forum_attachment_collector') . ')</option>';
 	}
 	echo '<input type = "submit" name="submit" class="btn-download" value="';
 	echo get_string('expbtn', 'local_forum_attachment_collector') . '" />';
@@ -93,9 +93,9 @@ function getFiles($forumid){
 	"INNER JOIN {forum} mf ON (mfd.forum = mf.id) " .
 	"INNER JOIN {course} mc2 ON (mf.course = mc2.id) " .
 	"WHERE mfd.id = :forum_id AND mf2.filename <> '.'";
-	
+
 	$files = $DB->get_records_sql($sql, array('forum_id'=>$forumid));
-	
+
 	return $files;
 }
 
@@ -104,7 +104,7 @@ function createDownloadPackage(){
 	$files = getFiles($_POST['selectForum']);
 	$fs = get_file_storage();
 	$zip = array();
-	
+
 	$coursename = "";
 
 	foreach ($files as $attachment){
@@ -117,7 +117,7 @@ function createDownloadPackage(){
 		$attachment->filename);
 		$coursename = $attachment->coursename;
 		$ext = end(explode('.', $attachment->filename));
-		$pathname = $attachment->forumname . "_Forum/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
+		$pathname = $attachment->forumname . "_Forum/" . $attachment->discussion . "/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
 		$zip[$pathname] = $attachment_file;
 	}
 
