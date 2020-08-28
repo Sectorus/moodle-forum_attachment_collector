@@ -53,7 +53,7 @@ if(isset($_GET['selectCourse']) && !isset($_GET['selectForum'])){
 	echo '<select name = "selectForum">';
 	foreach ($all_forums as $forum){
 		$attachment_count = sizeof(getFiles($forum->id));
-		if($attachment_count > 0) echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . $attachment_count . " " . get_string('files', 'local_forum_attachment_collector') . ')</option>';
+		if($attachment_count > 0 && $forum->course == $_GET['selectCourse']) echo '<option value ="' . $forum->id . '">' . $forum->name . ' (' . $attachment_count . " " . get_string('files', 'local_forum_attachment_collector') . ')</option>';
 	}
 	echo '<input type = "submit" name="submit" class="btn-download" value="';
 	echo get_string('expbtn', 'local_forum_attachment_collector') . '" />';
@@ -85,7 +85,7 @@ function getForums(){
 function getFiles($forumid){
 	global $DB;
 
-	$sql = "select mf.*, mfd.name as discussion, mf2.name as forumname, mc2.fullname as coursename
+	$sql = "select mf.*, mfd.name as discussion, mf2.name as forumname, mc2.fullname as coursename, mc2.id as courseid
 	from {files} mf
 	inner join {context} mc on(mf.contextid = mc.id)
 	inner join {course_modules} mcm on(mc.instanceid = mcm.id)
