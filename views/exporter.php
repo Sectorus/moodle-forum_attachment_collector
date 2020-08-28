@@ -11,9 +11,8 @@ require('../../../config.php');
 require_once($CFG->libdir.'/filelib.php');
 core_php_time_limit::raise();
 
-if(!has_capability('moodle/course:manageactivities', $context)) return;
-
 $context = context_system::instance();
+if(!has_capability('moodle/course:manageactivities', $context)) return;
 
 $pageurl = new moodle_url('/local/forum_attachment_collector_exporter/views/exportpage.php');
 $PAGE->set_url($pageurl);
