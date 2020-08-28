@@ -33,3 +33,4 @@ $string['expforumbtn'] = 'Load Forums';
 $string['expbtn'] = 'Download';
 $string['files'] = 'files';
 $string['noentries'] = 'There are no entries for the selected course.';
+$string['attachment_collector'] = 'Download all attachments';

@@ -33,3 +33,4 @@ $string['expforumbtn'] = 'Lade Foren';
 $string['expbtn'] = 'Download';
 $string['files'] = 'Datei/en';
 $string['noentries'] = 'There are no entries for the selected course.';
+$string['attachment_collector'] = 'Alle Anhänge herunterladen';

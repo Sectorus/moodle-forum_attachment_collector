@@ -26,10 +26,10 @@ $submitlink = $CFG->wwwroot . "/local/forum_attachment_collector/views/exporter.
 $forums = "";
 
 
-if(!isset($_POST['selectForum'])){
+if(!isset($_GET['selectForum'])){
 	echo $OUTPUT->header();
 	echo get_string('select_course', 'local_forum_attachment_collector') .':<br>';
-	echo '<form class="forum-attachment-export-form" action= "' . $submitlink . '" method="POST">';
+	echo '<form class="forum-attachment-export-form" action= "' . $submitlink . '" method="GET">';
 	echo '<select name = "selectCourse">';
 
 	$forum_courses = getCourses();
@@ -45,10 +45,10 @@ else {
 	createDownloadPackage();
 }
 
-if(isset($_POST['selectCourse']) && !isset($_POST['selectForum'])){
+if(isset($_GET['selectCourse']) && !isset($_GET['selectForum'])){
 	$all_forums = getForums();
 	echo get_string('select_forum', 'local_forum_attachment_collector') .':<br>';
-	echo '<form class="forum-attachment-export-form" action= "' . $submitlink . '" method="POST">';
+	echo '<form class="forum-attachment-export-form" action= "' . $submitlink . '" method="GET">';
 	echo '<select name = "selectForum">';
 	foreach ($all_forums as $forum){
 		$attachment_count = sizeof(getFiles($forum->id));
@@ -75,24 +75,23 @@ function getCourses(){
 function getForums(){
 	global $DB;
 
-	$sql = "select distinct * from {forum_discussions};";
-	$courses = $DB->get_records_sql($sql);
+	$sql = "select * from {forum};";
+	$forums = $DB->get_records_sql($sql);
 
-	return $courses;
+	return $forums;
 }
 
 function getFiles($forumid){
 	global $DB;
 
-	$sql = "SELECT mf2.filename, mfd.id, mf.name AS forumname, mc2.fullname as coursename, mfd.name AS discussion, " .
-	"mf2.contextid, mf2.component, mf2.filearea, mf2.itemid, mf2.filepath, mf2.author " .
-	"FROM {forum_discussions} mfd " .
-	"INNER JOIN {course_modules} mcm ON (mfd.forum = mcm.instance) " .
-	"INNER JOIN {context} mc ON (mcm.id = mc.instanceid) " .
-	"INNER JOIN {files} mf2 ON (mf2.contextid = mc.id) " .
-	"INNER JOIN {forum} mf ON (mfd.forum = mf.id) " .
-	"INNER JOIN {course} mc2 ON (mf.course = mc2.id) " .
-	"WHERE mfd.id = :forum_id AND mf2.filename <> '.'";
+	$sql = "select mf.*, mfd.name as discussion, mf2.name as forumname, mc2.fullname as coursename
+	from {files} mf
+	inner join {context} mc on(mf.contextid = mc.id)
+	inner join {course_modules} mcm on(mc.instanceid = mcm.id)
+	inner join {forum_discussions} mfd on(mcm.instance = mfd.forum)
+	inner join {forum} mf2 on(mf2.id = mcm.instance)
+	inner join {course} mc2 on(mc2.id = mf2.course)
+	where mf.filename <> '.' and mf.filearea = 'attachment' and mcm.instance = :forum_id";
 
 	$files = $DB->get_records_sql($sql, array('forum_id'=>$forumid));
 
@@ -101,7 +100,7 @@ function getFiles($forumid){
 
 function createDownloadPackage(){
 	global $CFG;
-	$files = getFiles($_POST['selectForum']);
+	$files = getFiles($_GET['selectForum']);
 	$fs = get_file_storage();
 	$zip = array();
 
@@ -117,7 +116,7 @@ function createDownloadPackage(){
 		$attachment->filename);
 		$coursename = $attachment->coursename;
 		$ext = end(explode('.', $attachment->filename));
-		$pathname = $attachment->forumname . "_Forum/" . $attachment->discussion . "/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
+		$pathname = $attachment->forumname . "_Forum/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
 		$zip[$pathname] = $attachment_file;
 	}
 
