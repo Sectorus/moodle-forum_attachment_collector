@@ -107,6 +107,7 @@ function createDownloadPackage(){
 	$zip = array();
 
 	$coursename = "";
+	$forumname = "";
 
 	foreach ($files as $attachment){
 		$attachment_file = $fs->get_file(
@@ -117,6 +118,7 @@ function createDownloadPackage(){
 		$attachment->filepath,
 		$attachment->filename);
 		$coursename = $attachment->coursename;
+		$forumname =  $attachment->forumname;
 		$ext = end(explode('.', $attachment->filename));
 		$pathname = $attachment->forumname . "_Forum/" . $attachment->filename . "_by_" . $attachment->author . "." . $ext;
 		$zip[$pathname] = $attachment_file;
@@ -126,7 +128,7 @@ function createDownloadPackage(){
 		$zipper = new zip_packer();
 
 		if ($zipper->archive_to_pathname($zip, $tempzip)) {
-			send_temp_file($tempzip, $coursename . "_attachments.zip");
+			send_temp_file($tempzip, $coursename . "_" . $forumname . "_attachments.zip");
 		}
 	}
 ?>
