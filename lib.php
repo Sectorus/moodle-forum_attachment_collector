@@ -25,17 +25,14 @@
 defined('MOODLE_INTERNAL') || die;
 
 function local_forum_attachment_collector_extend_settings_navigation(settings_navigation $nav, context $context){
-  global $PAGE, $CFG, $COURSE, $DB;
+  global $PAGE, $CFG, $COURSE;
 
 if(!has_capability('moodle/course:manageactivities', $context)) return;
 if ($PAGE->context->contextlevel == CONTEXT_MODULE && $PAGE->cm->modname === 'forum') {
         $a_collect = navigation_node::create(get_string('attachment_collector', 'local_forum_attachment_collector'));
         $a_collect->key = 'forum2pdf';
         $ctx = context_course::instance($COURSE->id);
-        
-        $sql = "SELECT id FROM mdl_course_modules WHERE instance = :id";
-        $files = $DB->get_records_sql($sql, array('id'=> $PAGE->cm->instance));
-        //
+
         $a_collect->action = new moodle_url('/local/forum_attachment_collector/views/exporter.php', array('selectCourse' => $COURSE->id, 'selectForum' => $PAGE->cm->instance));
 
         $modulesettings = $nav->get('modulesettings');
